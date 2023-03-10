@@ -21,7 +21,13 @@ export interface SignedPath {
   path: string;
 }
 
-export const hassUrl = `${location.protocol}//${location.host}`;
+/*
+export const hassUrl = `${location.protocol}//${location.host}`.replace(
+  "8888",
+  "8123"
+);
+*/
+export const hassUrl = "http://localhost:8123";
 
 export const autocompleteLoginFields = (schema: HaFormSchema[]) =>
   schema.map((field) => {

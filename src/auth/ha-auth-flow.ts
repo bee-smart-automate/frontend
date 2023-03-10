@@ -15,7 +15,7 @@ import { computeInitialHaFormData } from "../components/ha-form/compute-initial-
 import "../components/ha-form/ha-form";
 import "../components/ha-formfield";
 import "../components/ha-markdown";
-import { AuthProvider, autocompleteLoginFields } from "../data/auth";
+import { AuthProvider, autocompleteLoginFields , hassUrl } from "../data/auth";
 import {
   DataEntryFlowStep,
   DataEntryFlowStepForm,
@@ -238,7 +238,7 @@ export class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
 
   private async _providerChanged(newProvider?: AuthProvider) {
     if (this._step && this._step.type === "form") {
-      fetch(`/auth/login_flow/${this._step.flow_id}`, {
+      fetch(`${hassUrl}/auth/login_flow/${this._step.flow_id}`, {
         method: "DELETE",
         credentials: "same-origin",
       }).catch((err) => {
@@ -256,7 +256,7 @@ export class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
     }
 
     try {
-      const response = await fetch("/auth/login_flow", {
+      const response = await fetch(`${hassUrl}/auth/login_flow`, {
         method: "POST",
         credentials: "same-origin",
         body: JSON.stringify({
@@ -364,11 +364,14 @@ export class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
     const postData = { ...this._stepData, client_id: this.clientId };
 
     try {
-      const response = await fetch(`/auth/login_flow/${this._step.flow_id}`, {
-        method: "POST",
-        credentials: "same-origin",
-        body: JSON.stringify(postData),
-      });
+      const response = await fetch(
+        `${hassUrl}/auth/login_flow/${this._step.flow_id}`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          body: JSON.stringify(postData),
+        }
+      );
 
       const newStep = await response.json();
 
