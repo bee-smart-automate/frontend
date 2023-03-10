@@ -53,14 +53,16 @@ module.exports.definedVars = ({ isProdBuild, latestBuild, defineOverlay }) => ({
   ...defineOverlay,
 });
 
-module.exports.htmlMinifierOptions = {
+const htmlMinifierOptions = {
   caseSensitive: true,
   collapseWhitespace: true,
   conservativeCollapse: true,
   decodeEntities: true,
   removeComments: true,
   removeRedundantAttributes: true,
-  minifyCSS: true,
+  minifyCSS: {
+    level: 0,
+  },
 };
 
 module.exports.terserOptions = (latestBuild) => ({
@@ -77,7 +79,7 @@ module.exports.babelOptions = ({ latestBuild, isProdBuild }) => ({
       "@babel/preset-env",
       {
         useBuiltIns: "entry",
-        corejs: { version: "3.28", proposals: true },
+        corejs: { version: "3.29", proposals: true },
         bugfixes: true,
       },
     ],
@@ -115,11 +117,15 @@ module.exports.babelOptions = ({ latestBuild, isProdBuild }) => ({
       "template-html-minifier",
       {
         modules: {
-          lit: ["html", "svg", { name: "css", encapsulation: "style" }],
+          lit: [
+            "html",
+            { name: "svg", encapsulation: "svg" },
+            { name: "css", encapsulation: "style" },
+          ],
           "@polymer/polymer/lib/utils/html-tag": ["html"],
         },
         strictCSS: true,
-        htmlMinifier: module.exports.htmlMinifierOptions,
+        htmlMinifier: htmlMinifierOptions,
         failOnError: true, // we can turn this off in case of false positives
       },
     ],

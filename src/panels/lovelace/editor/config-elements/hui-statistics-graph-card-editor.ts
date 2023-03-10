@@ -121,7 +121,9 @@ export class HuiStatisticsGraphCardEditor
       !deepEqual(this._configEntities, changedProps.get("_configEntities"))
     ) {
       this._metaDatas = undefined;
-      this._getStatisticsMetaData(this._configEntities);
+      if (this._configEntities?.length) {
+        this._getStatisticsMetaData(this._configEntities);
+      }
     }
   }
 
@@ -274,6 +276,7 @@ export class HuiStatisticsGraphCardEditor
         @value-changed=${this._valueChanged}
       ></ha-form>
         <ha-statistics-picker
+          allow-custom-entity
           .hass=${this.hass}
           .pickStatisticLabel=${this.hass!.localize(
             "ui.panel.lovelace.editor.card.statistics-graph.pick_statistic"
@@ -297,18 +300,26 @@ export class HuiStatisticsGraphCardEditor
   }
 
   private async _entitiesChanged(ev: CustomEvent): Promise<void> {
-    const config = { ...this._config!, entities: ev.detail.value };
+    const newEntityIds = ev.detail.value;
+
+    // Save the EntityConfig objects from being replaced with strings
+    const newEntities = newEntityIds.map((newEnt) => {
+      const matchEntity = this._config!.entities.find(
+        (oldEnt) => typeof oldEnt !== "string" && oldEnt.entity === newEnt
+      );
+      return matchEntity ?? newEnt;
+    });
+
+    const config = { ...this._config!, entities: newEntities };
     if (
-      config.entities?.some((statistic_id) =>
-        isExternalStatistic(statistic_id)
-      ) &&
+      newEntityIds?.some((statistic_id) => isExternalStatistic(statistic_id)) &&
       config.period === "5minute"
     ) {
       delete config.period;
     }
     const metadata =
       config.stat_types || config.unit
-        ? await getStatisticMetadata(this.hass!, config.entities)
+        ? await getStatisticMetadata(this.hass!, newEntityIds)
         : undefined;
     if (config.stat_types && config.entities.length) {
       config.stat_types = ensureArray(config.stat_types).filter((stat_type) =>
